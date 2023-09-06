@@ -17,17 +17,21 @@ var issuerID = ""
 var classSuffix = "codelab_class"
 var objectSuffix = "codelab_object"
 var objectID = issuerID + "." + objectSuffix
-var keyFilePath = "" // Replace this with the actual path to your key file
+var keyFilePath = ""
 
 func main() {
-	loadParametersFromPropertiesFile()
+	loadPropertiesFromFile()
 	createJWTTokenWithEmbeddedGenericPass()
 }
 
-func loadParametersFromPropertiesFile() {
-	parameters, _ := os.ReadFile("parameters.json")
+func loadPropertiesFromFile() {
+	properties, err := os.ReadFile("properties.json")
 	var parametersData map[string]interface{}
-	json.Unmarshal(parameters, &parametersData)
+	err = json.Unmarshal(properties, &parametersData)
+	if err != nil {
+		fmt.Println("Error reading properties file:", err)
+		return
+	}
 	issuerID = parametersData["issuer_id"].(string)
 	keyFilePath = parametersData["key_file_path"].(string)
 }
@@ -79,7 +83,7 @@ func createJWTTokenWithEmbeddedGenericPass() {
 	genericObject := buildGenericPassObject()
 
 	claims := jwt.MapClaims{
-		"iss": config.Email, // `client_email` in service account file.
+		"iss": config.Email,
 		"aud": "google",
 		"origins": []string{
 			"http://localhost:3000",
